@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diesel Lab | Advanced Engineering</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+
+        :root {
+            --primary: #00f2ff;
+            --accent: #ff0055;
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #canvas-container {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100vh;
+            z-index: -1;
+            background: radial-gradient(circle at center, #111 0%, #050505 100%);
+        }
+
+        section {
+            min-height: 100vh;
+            padding: 10vh 10%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h1, h2 {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        .hero { align-items: center; text-align: center; }
+        
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0,242,255,0.3));
+        }
+
+        .hero p { font-size: 1.2rem; color: var(--primary); letter-spacing: 5px; opacity: 0.8; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .card {
+            background: var(--glass);
+            padding: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 4px solid var(--primary);
+            backdrop-filter: blur(15px);
+            transition: 0.4s;
+        }
+
+        .card:hover {
+            background: rgba(0, 242, 255, 0.05);
+            transform: translateY(-10px);
+            border-color: var(--primary);
+        }
+
+        .card h3 { color: var(--primary); margin-top: 0; }
+
+        .btn-ws {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            text-decoration: none;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .btn-ws:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 30px var(--primary);
+        }
+
+        /* Linha Decorativa Cyberpunk */
+        .line {
+            width: 100px; height: 4px;
+            background: var(--primary);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <section class="hero">
+        <p>LABORATÓRIO DE PRECISÃO</p>
+        <h1 id="main-title">DIESEL LAB</h1>
+        <div class="line"></div>
+    </section>
+
+    <section id="services">
+        <h2>SOLUÇÕES DIGITAIS</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>01. Diagnóstico</h3>
+                <p>Mapeamento térmico e eletrónico de sistemas de injeção direta.</p>
+            </div>
+            <div class="card">
+                <h3>02. Performance</h3>
+                <p>Otimização de débito e pressão para máxima eficiência energética.</p>
+            </div>
+            <div class="card">
+                <h3>03. Remanufatura</h3>
+                <p>Processos industriais de recuperação com padrão original.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" style="text-align: center;">
+        <h2>SISTEMA OPERACIONAL</h2>
+        <p>Pronto para elevar a potência do seu motor?</p>
+        <a href="https://wa.me/351900000000" class="btn-ws">INICIAR PROTOCOLO</a>
+    </section>
+
+    <script>
+        // --- CENA 3D AVANÇADA ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Geometria de Injetor Mais Detalhada
+        const injector = new THREE.Group();
+        
+        const bodyMat = new THREE.MeshStandardMaterial({ 
+            color: 0x222222, metalness: 1, roughness: 0.1,
+            emissive: 0x00f2ff, emissiveIntensity: 0.05
+        });
+
+        const mainBody = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.4, 3, 6), bodyMat);
+        const topPart = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), bodyMat);
+        topPart.position.y = 1.5;
+        const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.02, 1.5, 32), bodyMat);
+        nozzle.position.y = -2;
+
+        injector.add(mainBody, topPart, nozzle);
+        scene.add(injector);
+
+        // Partículas "Nebula"
+        const pCount = 2000;
+        const pGeo = new THREE.BufferGeometry();
+        const pPos = new Float32Array(pCount * 3);
+        for(let i=0; i<pCount*3; i++) pPos[i] = (Math.random() - 0.5) * 15;
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+        const pMat = new THREE.PointsMaterial({ size: 0.02, color: 0x00f2ff, transparent: true, opacity: 0.5 });
+        const stars = new THREE.Points(pGeo, pMat);
+        scene.add(stars);
+
+        // Luzes Dinâmicas
+        const pLight = new THREE.PointLight(0x00f2ff, 5, 15);
+        pLight.position.set(5, 5, 5);
+        scene.add(pLight, new THREE.AmbientLight(0xffffff, 0.3));
+
+        camera.position.z = 6;
+
+        // Animação e Interação
+        let mouseX = 0, mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) - 0.5;
+            mouseY = (e.clientY / window.innerHeight) - 0.5;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            injector.rotation.y += 0.01;
+            injector.rotation.z += mouseX * 0.2;
+            injector.rotation.x += mouseY * 0.2;
+            stars.rotation.y -= 0.001;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- GSAP REVEALS ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.from("#main-title", { duration: 2, y: 100, opacity: 0, ease: "expo.out" });
+        
+        gsap.utils.toArray(".card").forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: card,
+                y: 50, opacity: 0, 
+                duration: 1, 
+                delay: i * 0.2
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
