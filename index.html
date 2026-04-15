@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNX Diesel Lab | High Performance</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400&family=Orbitron:wght@400;900&display=swap');
+
+        :root {
+            --primary-red: #ff0000; /* Vermelho Diesel Lab */
+            --bg-dark: #050505;
+            --font-tech: 'JetBrains Mono', monospace;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background: var(--bg-dark);
+            color: #fff;
+            font-family: var(--font-tech);
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100vh;
+            z-index: 1;
+        }
+
+        /* Overlay de Interface */
+        .interface {
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Logo com Identidade Visual */
+        .logo-box {
+            position: absolute;
+            top: 40px; left: 40px;
+            pointer-events: auto;
+        }
+
+        .logo-box h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            letter-spacing: 5px;
+            margin: 0;
+            color: white;
+        }
+
+        .logo-box h1 span {
+            color: var(--primary-red);
+            font-weight: 900;
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+
+        /* Etiquetas de Diagnóstico em Vermelho */
+        .diag-label {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--primary-red);
+        }
+
+        .line-tech {
+            width: 80px;
+            height: 1px;
+            background: var(--primary-red);
+            box-shadow: 0 0 10px var(--primary-red);
+        }
+
+        .diag-text {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .pos-1 { top: 35%; left: 10%; }
+        .pos-2 { bottom: 20%; right: 10%; flex-direction: row-reverse; }
+
+        /* Botão de Ação */
+        .explore-btn {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 40px;
+            border: 2px solid var(--primary-red);
+            background: transparent;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 5px;
+            text-decoration: none;
+            pointer-events: auto;
+            transition: 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+        }
+
+        .explore-btn:hover {
+            background: var(--primary-red);
+            color: black;
+            box-shadow: 0 0 30px var(--primary-red);
+        }
+
+        /* Efeito de Scanner a passar no fundo */
+        .scanner-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-red), transparent);
+            opacity: 0.1;
+            top: 0;
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    <div class="scanner-line"></div>
+
+    <main class="interface">
+        <div class="logo-box">
+            <h1>SNX <span>DIESEL LAB</span></h1>
+        </div>
+
+        <div class="diag-label pos-1">
+            <div class="line-tech"></div>
+            <div class="diag-text">
+                STATUS: POWER_OPTIMIZED<br>
+                CORE: ACTIVE_REMAP
+            </div>
+        </div>
+
+        <div class="diag-label pos-2">
+            <div class="line-tech"></div>
+            <div class="diag-text">
+                PRESSURE: 3000 BAR<br>
+                DIAGNOSTIC: 100% OK
+            </div>
+        </div>
+
+        <a href="https://wa.me/SEUTELEFONE" class="explore-btn">INICIAR PROTOCOLO</a>
+    </main>
+
+    <script>
+        // --- CENA 3D RED & DARK ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Material de Metal Escuro com brilho vermelho
+        const metalMat = new THREE.MeshStandardMaterial({ 
+            color: 0x111111, 
+            metalness: 1, 
+            roughness: 0.3,
+            emissive: 0xff0000,
+            emissiveIntensity: 0.05
+        });
+
+        const injector = new THREE.Group();
+        const mainBody = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.4, 3, 32), metalMat);
+        const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.02, 1, 32), metalMat);
+        nozzle.position.y = -2;
+        injector.add(mainBody, nozzle);
+        scene.add(injector);
+
+        // Partículas Vermelhas (Como se fossem faíscas ou dados)
+        const pCount = 800;
+        const pGeo = new THREE.BufferGeometry();
+        const pPos = new Float32Array(pCount * 3);
+        for(let i=0; i<pCount*3; i++) pPos[i] = (Math.random() - 0.5) * 12;
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+        const pMat = new THREE.PointsMaterial({ size: 0.02, color: 0xff0000, transparent: true, opacity: 0.4 });
+        const fog = new THREE.Points(pGeo, pMat);
+        scene.add(fog);
+
+        // Luzes Vermelhas e Brancas
+        const lightRed = new THREE.PointLight(0xff0000, 2, 10);
+        lightRed.position.set(-3, 3, 3);
+        const lightWhite = new THREE.DirectionalLight(0xffffff, 0.8);
+        lightWhite.position.set(2, 5, 5);
+        scene.add(lightRed, lightWhite, new THREE.AmbientLight(0xffffff, 0.1));
+
+        camera.position.z = 6;
+
+        let mouseX = 0, mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) - 0.5;
+            mouseY = (e.clientY / window.innerHeight) - 0.5;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            injector.rotation.y += 0.007;
+            injector.rotation.x += (mouseY * 0.4 - injector.rotation.x) * 0.05;
+            injector.rotation.z += (mouseX * 0.4 - injector.rotation.z) * 0.05;
+            fog.rotation.y -= 0.002;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
